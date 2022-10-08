@@ -15,6 +15,8 @@ camera.attachControl(canvas, true);
 
 const light = new BABYLON.HemisphericLight("light1", new BABYLON.Vector3(0, 1, 0), scene);
 light.intensity = 0.7;
+light.specular = new BABYLON.Color3(0.05, 0.05, 0.05);
+light.diffuse = new BABYLON.Color3(0.8, 0.8, 0.8);
 
 const rocketParticles = new RocketParticles(scene);
 

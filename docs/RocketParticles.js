@@ -24,43 +24,44 @@ class RocketParticles {
     // const position = BABYLON.Vector3.Zero();
     position = BABYLON.Vector3.Zero();
     const particleCount = 30;
-    const sphere = BABYLON.CreateSphere("sphere1", { segments: 8, diameter: 1 }, scene);
+    const sphere = BABYLON.CreateSphere("sphere1", { segments: 5, diameter: 1 }, scene);
 
-    BABYLON.SceneLoader.LoadAssetContainer("./assets/", "Rocket - Smoke1.gltf", scene, (obj) => {
-      const m = obj.meshes[0];
-      //   console.log(m);
+    // BABYLON.SceneLoader.LoadAssetContainer("./assets/", "Rocket - Smoke1.gltf", scene, (obj) => {
+    //   const m = obj.meshes[0];
+    //   console.log(m);
 
-      //   const posFcn = function (instance, i) {
-      //     instance.position.x = i;
+    //   const posFcn = function (instance, i) {
+    //     instance.position.x = i;
 
-      //     instance.rotationQuaternion = null;
-      //     instance.rotation.x = Math.PI / 2;
-      //     instance.rotation.y = Math.random() * Math.PI * 2;
+    //     instance.rotationQuaternion = null;
+    //     instance.rotation.x = Math.PI / 2;
+    //     instance.rotation.y = Math.random() * Math.PI * 2;
 
-      //     instance.scale.x = 0.01;
-      //     instance.scale.y = 0.01;
-      //     instance.scale.z = 0.01;
-      //   };
+    //     instance.scale.x = 0.01;
+    //     instance.scale.y = 0.01;
+    //     instance.scale.z = 0.01;
+    //   };
 
-      sps.addShape(m, particleCount);
+    //   sps.addShape(m, particleCount);
     //   _sps.buildMesh();
-    });
+    // });
 
     const material = new BABYLON.StandardMaterial("kosh", scene);
     material.diffuseColor = new BABYLON.Color3(1, 1, 1);
     material.emissiveColor = new BABYLON.Color3(0.7, 0.7, 0.7);
-    // material.alpha = 0.2;
+    material.ambientColor = new BABYLON.Color3(0.7, 0.7, 0.7);
+    material.alpha = 0.9;
     // material.specularPower = 2;
 
     // Fresnel
-    // material.reflectionFresnelParameters = new BABYLON.FresnelParameters();
-    // material.reflectionFresnelParameters.bias = 0.1;
+    material.reflectionFresnelParameters = new BABYLON.FresnelParameters();
+    material.reflectionFresnelParameters.bias = 0.1;
 
-    // material.emissiveFresnelParameters = new BABYLON.FresnelParameters();
-    // material.emissiveFresnelParameters.bias = 0.1;
-    // material.emissiveFresnelParameters.power = 2;
-    // material.emissiveFresnelParameters.leftColor = BABYLON.Color3.White();
-    // material.emissiveFresnelParameters.rightColor = new BABYLON.Color3(0.8, 0.8, 0.8);
+    material.emissiveFresnelParameters = new BABYLON.FresnelParameters();
+    material.emissiveFresnelParameters.bias = 0.1;
+    material.emissiveFresnelParameters.power = 2;
+    material.emissiveFresnelParameters.leftColor = BABYLON.Color3.White();
+    material.emissiveFresnelParameters.rightColor = new BABYLON.Color3(0.8, 0.8, 0.8);
 
     sphere.material = material;
     sps.addShape(sphere, particleCount);
@@ -90,9 +91,9 @@ class RocketParticles {
       particle.velocity.y = -(Math.random() + 0.5) * 0.1;
       particle.velocity.z = (Math.random() - 0.5) * 0.08;
 
-      particle.rotation.x = Math.random() * Math.PI;
-      particle.rotation.y = Math.random() * Math.PI;
-      particle.rotation.z = Math.random() * Math.PI;
+      particle.rotation.x = Math.random() * Math.PI * 2;
+      particle.rotation.y = Math.random() * Math.PI * 2;
+      particle.rotation.z = Math.random() * Math.PI * 2;
 
       const s = BABYLON.Scalar.Clamp(Math.random() * 5, 2, 4);
       particle.scaling = new BABYLON.Vector3(s, s, s);
