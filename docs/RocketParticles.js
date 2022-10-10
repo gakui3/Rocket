@@ -58,10 +58,10 @@ class RocketParticles {
     sps.addShape(s2.meshes[1], particleCount);
     sps.addShape(s3.meshes[1], particleCount);
     sps.addShape(s4.meshes[1], particleCount);
-    sps.addShape(s5.meshes[1], particleCount);
+    // sps.addShape(s5.meshes[1], particleCount);
 
     const particleDatas = [];
-    for (let i = 0; i < particleCount * 5; i++) {
+    for (let i = 0; i < particleCount * 4; i++) {
       const pd = new ParticleData();
       particleDatas.push(pd);
     }
@@ -81,15 +81,15 @@ class RocketParticles {
       //   particle.position.y = 3;
       //   particle.position.z = (Math.random() - 0.5) * 2;
 
-      particle.velocity.x = (Math.random() - 0.5) * 0.08;
+      particle.velocity.x = (Math.random() - 0.5) * 0.06;
       particle.velocity.y = -(Math.random() + 0.5) * 0.05;
-      particle.velocity.z = (Math.random() - 0.5) * 0.08;
+      particle.velocity.z = (Math.random() - 0.5) * 0.06;
 
       particle.rotation.x = Math.random() * Math.PI * 2;
       particle.rotation.y = Math.random() * Math.PI * 2;
       particle.rotation.z = Math.random() * Math.PI * 2;
 
-      const s = 0.02;// BABYLON.Scalar.Clamp(Math.random() * 5, 0.02, 0.04);
+      const s = BABYLON.Scalar.Clamp(Math.random() * 5, 0.03, 0.04);
       particle.scaling = new BABYLON.Vector3(s, s, s);
     };
 
@@ -109,7 +109,7 @@ class RocketParticles {
       }
 
       particle.velocity.y *= 0.999;
-      particle.scaling = particle.scaling.multiply(new BABYLON.Vector3(1.01, 1.01, 1.01));
+      // particle.scaling = particle.scaling.multiply(new BABYLON.Vector3(1.01, 1.01, 1.01));
       particle.position.addInPlace(particle.velocity); // update particle new position
     };
 

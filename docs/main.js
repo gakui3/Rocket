@@ -35,6 +35,6 @@ BABYLON.SceneLoader.Append("./assets/", "Rocket - Launch.glb", scene, (obj) => {
 // Render every frame
 engine.runRenderLoop(() => {
   if (!init) { return; }
-  rocketParticles.setPosition(root.position.add(new BABYLON.Vector3(58.5, -4.5, 7)).add(offset));
+  rocketParticles.setPosition(root.position.add(new BABYLON.Vector3(58.5, -6, 7)).add(offset));
   scene.render();
 });
