@@ -5,11 +5,11 @@ import "@babylonjs/loaders/glTF";
 const canvas = document.getElementById("renderCanvas");
 const engine = new BABYLON.Engine(canvas);
 const scene = new BABYLON.Scene(engine);
-const camera = new BABYLON.FreeCamera("camera1", new BABYLON.Vector3(0, 5, -25), scene);
+const camera = new BABYLON.FreeCamera("camera1", new BABYLON.Vector3(0, 0, -25), scene);
 camera.setTarget(BABYLON.Vector3.Zero());
 let root;
 let init = false;
-const tn = new BABYLON.TransformNode();
+const offset = new BABYLON.Vector3(-30, -15, 0);
 
 camera.attachControl(canvas, true);
 
@@ -18,12 +18,13 @@ light.intensity = 0.7;
 light.specular = new BABYLON.Color3(0.05, 0.05, 0.05);
 light.diffuse = new BABYLON.Color3(0.8, 0.8, 0.8);
 
-const rocketParticles = new RocketParticles(scene);
+const rocketParticles = new RocketParticles();
+rocketParticles.init(scene);
 
 BABYLON.SceneLoader.Append("./assets/", "Rocket - Launch.glb", scene, (obj) => {
   const _root = scene.getMeshByName("__root__");
   _root.scaling = new BABYLON.Vector3(1, 1, 1);
-  _root.position = new BABYLON.Vector3(-30, -7, 0);
+  _root.position = offset;
 
   root = _root.getChildren()[0];
 
@@ -34,7 +35,6 @@ BABYLON.SceneLoader.Append("./assets/", "Rocket - Launch.glb", scene, (obj) => {
 // Render every frame
 engine.runRenderLoop(() => {
   if (!init) { return; }
-
-  rocketParticles.setPosition(root.position.add(new BABYLON.Vector3(28.5, -11.5, 8)));
+  rocketParticles.setPosition(root.position.add(new BABYLON.Vector3(58.5, -4.5, 7)).add(offset));
   scene.render();
 });
