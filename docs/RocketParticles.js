@@ -7,13 +7,15 @@ class ParticleData {
     this.lifeTime = 0.0;
     this.lifeTimeCounter = 0.0;
     this.opacity = 0.0;
+    this.rotateValue = new BABYLON.Vector3(0, 0, 0);
     this.reset();
   }
 
   reset () {
-    this.lifeTime = BABYLON.Scalar.RandomRange(1.5, 3);
+    this.lifeTime = BABYLON.Scalar.RandomRange(1.8, 3.3);
     this.opacity = 0.0;
     this.lifeTimeCounter = 0.0;
+    this.rotateValue = new BABYLON.Vector3(BABYLON.Scalar.RandomRange(-0.01, 0.01), BABYLON.Scalar.RandomRange(-0.01, 0.01), BABYLON.Scalar.RandomRange(-0.01, 0.01));
   }
 }
 
@@ -122,6 +124,10 @@ class RocketParticles {
 
       // particleの現在のlifetimeを0~1にリマップして下記のアニメーションで使用するため
       const v = map(particleDatas[particle.idx].lifeTimeCounter, 0, particleDatas[particle.idx].lifeTime, 0, 1);
+
+      particle.rotation.x += particleDatas[particle.idx].rotateValue.x;
+      particle.rotation.y += particleDatas[particle.idx].rotateValue.y;
+      particle.rotation.z += particleDatas[particle.idx].rotateValue.z;
 
       // 煙のアニメーションの設定
       if (v < 0.2) {
