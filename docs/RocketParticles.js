@@ -15,7 +15,7 @@ class ParticleData {
     this.lifeTime = BABYLON.Scalar.RandomRange(1.8, 3.3);
     this.opacity = 0.0;
     this.lifeTimeCounter = 0.0;
-    this.rotateValue = new BABYLON.Vector3(BABYLON.Scalar.RandomRange(-0.01, 0.01), BABYLON.Scalar.RandomRange(-0.01, 0.01), BABYLON.Scalar.RandomRange(-0.01, 0.01));
+    this.rotateValue = new BABYLON.Vector3(BABYLON.Scalar.RandomRange(-0.0075, -0.0075), BABYLON.Scalar.RandomRange(-0.0075, 0.0075), BABYLON.Scalar.RandomRange(-0.0075, 0.0075));
   }
 }
 
