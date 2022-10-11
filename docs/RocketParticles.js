@@ -163,7 +163,7 @@ class RocketParticles {
 
       // noiseを追加
       particle.velocity.x += noise.perlin2(particle.position.x / 100, particle.position.z / 100) * 0.002;
-      particle.velocity.y += noise.perlin2(particle.position.z / 100, particle.position.y / 100) * -0.002;
+      particle.velocity.y += noise.perlin2(particle.position.z / 100, particle.position.y / 100) * -0.00025;
       particle.velocity.z += noise.perlin2(particle.position.y / 100, particle.position.x / 100) * 0.002;
 
       particle.position.addInPlace(particle.velocity);
