@@ -1,6 +1,7 @@
 import * as BABYLON from "@babylonjs/core";
 
 let position, sps;
+let isEmit = false;
 
 class ParticleData {
   constructor () {
@@ -24,6 +25,16 @@ class RocketParticles {
   setPosition (p) {
     position = p;
     sps.setParticles();
+  }
+
+  // particleのemit開始
+  start () {
+    isEmit = true;
+  }
+
+  // particleのemit停止
+  stop () {
+    isEmit = false;
   }
 
   // 引数にBABYLON.sceneとBABYLON.engineが必要です
@@ -96,6 +107,8 @@ class RocketParticles {
 
     // particleの初期化処理
     sps.recycleParticle = function (particle) {
+      if (!isEmit) { return; }
+      particleDatas[particle.idx].reset();
       particle.position.x = position.x + (Math.random() - 0.5) * 2;
       particle.position.y = position.y;
       particle.position.z = position.z + (Math.random() - 0.5) * 2;
@@ -144,7 +157,6 @@ class RocketParticles {
       }
       if (v > 1.0) {
         this.recycleParticle(particle);
-        particleDatas[particle.idx].reset();
         return;
       }
 

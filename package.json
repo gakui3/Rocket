@@ -12,6 +12,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@babylonjs/gui": "^5.27.1",
     "@babylonjs/loaders": "^5.27.0",
     "babylonjs": "^5.25.0",
     "glsl-noise": "0.0.0",

@@ -13,6 +13,33 @@ const offset = new BABYLON.Vector3(-30, -15, 0);
 
 camera.attachControl(canvas, true);
 
+// テスト用のguiを追加
+const startButton = document.createElement("button");
+startButton.style.top = "100px";
+startButton.style.right = "30px";
+startButton.textContent = "start";
+startButton.style.width = "100px";
+startButton.style.height = "50px";
+
+startButton.setAttribute = ("id", "but");
+startButton.style.position = "absolute";
+startButton.style.color = "black";
+
+document.body.appendChild(startButton);
+
+const stopButton = document.createElement("button");
+stopButton.style.top = "160px";
+stopButton.style.right = "30px";
+stopButton.textContent = "stop";
+stopButton.style.width = "100px";
+stopButton.style.height = "50px";
+
+stopButton.setAttribute = ("id", "but");
+stopButton.style.position = "absolute";
+stopButton.style.color = "black";
+
+document.body.appendChild(stopButton);
+
 const light = new BABYLON.HemisphericLight("light1", new BABYLON.Vector3(0, 1, 0), scene);
 light.intensity = 0.7;
 light.specular = new BABYLON.Color3(0.05, 0.05, 0.05);
@@ -20,6 +47,15 @@ light.diffuse = new BABYLON.Color3(0.8, 0.8, 0.8);
 
 const rocketParticles = new RocketParticles();
 rocketParticles.init(scene, engine);
+rocketParticles.start();
+
+startButton.addEventListener("click", () => {
+  rocketParticles.start();
+});
+
+stopButton.addEventListener("click", () => {
+  rocketParticles.stop();
+});
 
 BABYLON.SceneLoader.Append("./assets/", "Rocket - Launch.glb", scene, (obj) => {
   const _root = scene.getMeshByName("__root__");
