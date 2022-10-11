@@ -9,9 +9,20 @@ const camera = new BABYLON.FreeCamera("camera1", new BABYLON.Vector3(0, 0, -25),
 camera.setTarget(BABYLON.Vector3.Zero());
 let root;
 let init = false;
+// ロケットのモデルのoriginがずれてたので適当な調整用のoffset値です
 const offset = new BABYLON.Vector3(-30, -15, 0);
 
 camera.attachControl(canvas, true);
+
+const light = new BABYLON.HemisphericLight("light1", new BABYLON.Vector3(0, 1, 0), scene);
+light.intensity = 0.7;
+light.specular = new BABYLON.Color3(0.05, 0.05, 0.05);
+light.diffuse = new BABYLON.Color3(0.8, 0.8, 0.8);
+
+// particleのインスタンスを作成
+const rocketParticles = new RocketParticles();
+rocketParticles.init(scene, engine);
+rocketParticles.start();
 
 // テスト用のguiを追加
 const startButton = document.createElement("button");
@@ -40,15 +51,6 @@ stopButton.style.color = "black";
 
 document.body.appendChild(stopButton);
 
-const light = new BABYLON.HemisphericLight("light1", new BABYLON.Vector3(0, 1, 0), scene);
-light.intensity = 0.7;
-light.specular = new BABYLON.Color3(0.05, 0.05, 0.05);
-light.diffuse = new BABYLON.Color3(0.8, 0.8, 0.8);
-
-const rocketParticles = new RocketParticles();
-rocketParticles.init(scene, engine);
-rocketParticles.start();
-
 startButton.addEventListener("click", () => {
   rocketParticles.start();
 });
@@ -57,14 +59,7 @@ stopButton.addEventListener("click", () => {
   rocketParticles.stop();
 });
 
-startButton.addEventListener("click", () => {
-  rocketParticles.start();
-});
-
-stopButton.addEventListener("click", () => {
-  rocketParticles.stop();
-});
-
+// ロケットのモデルを追加
 BABYLON.SceneLoader.Append("./assets/", "Rocket - Launch.glb", scene, (obj) => {
   const _root = scene.getMeshByName("__root__");
   _root.scaling = new BABYLON.Vector3(1, 1, 1);
@@ -76,9 +71,10 @@ BABYLON.SceneLoader.Append("./assets/", "Rocket - Launch.glb", scene, (obj) => {
   init = true;
 });
 
-// Render every frame
 engine.runRenderLoop(() => {
   if (!init) { return; }
+  // ロケットのモデルのoriginがずれてたので適当に調整した値です(58.5, -6, 7)
+  // エミットする際のpositionはsetposition関数からセットして下さい
   rocketParticles.setPosition(root.position.add(new BABYLON.Vector3(58.5, -6, 7)).add(offset));
   scene.render();
 });
