@@ -5,13 +5,13 @@ let position, sps;
 class ParticleData {
   constructor () {
     this.lifeTime = 0;
-    this.timer = 0;
+    this.opacity = 1.0;
     this.reset();
   }
 
   reset () {
     this.lifeTime = BABYLON.Scalar.RandomRange(2, 4);
-    this.timer = 0;
+    this.opacity = 1.0;
   }
 }
 
@@ -68,6 +68,7 @@ class RocketParticles {
 
     sphere.dispose();
     sps.buildMesh();
+    sps.mesh.hasVertexAlpha = true;
 
     scene.registerBeforeRender(function () {
       sps.setParticles();
@@ -89,6 +90,8 @@ class RocketParticles {
       particle.rotation.y = Math.random() * Math.PI * 2;
       particle.rotation.z = Math.random() * Math.PI * 2;
 
+      particle.color.a = 0.85;
+
       const s = BABYLON.Scalar.Clamp(Math.random() * 5, 0.03, 0.04);
       particle.scaling = new BABYLON.Vector3(s, s, s);
     };
@@ -100,9 +103,12 @@ class RocketParticles {
     };
 
     sps.updateParticle = function (particle) {
-      particleDatas[particle.idx].timer += 1;
       particleDatas[particle.idx].lifeTime -= 0.03;
       if (particleDatas[particle.idx].lifeTime < 0) {
+        particleDatas[particle.idx].opacity -= 0.05;
+        particle.color.a = particleDatas[particle.idx].opacity;
+      }
+      if (particleDatas[particle.idx].opacity < 0) {
         this.recycleParticle(particle);
         particleDatas[particle.idx].reset();
         return;
