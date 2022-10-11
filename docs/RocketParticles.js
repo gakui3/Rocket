@@ -1,6 +1,6 @@
 import * as BABYLON from "@babylonjs/core";
 
-let position, sps;
+let position, sps, particleDatas;
 let isEmit = true;
 
 class ParticleData {
@@ -28,6 +28,10 @@ class RocketParticles {
   }
 
   start () {
+    // for (let p = 0; p < sps.nbParticles; p++) {
+    //   particleDatas[sps.particles[p].idx].reset();
+    //   sps.particles[p].scaling = new BABYLON.Vector3(0, 0, 0);
+    // }
     isEmit = true;
   }
 
@@ -86,7 +90,7 @@ class RocketParticles {
     sps.addShape(smoke04.meshes[1], particleCountPerShape);
     // sps.addShape(s5.meshes[1], particleCount);
 
-    const particleDatas = [];
+    particleDatas = [];
     for (let i = 0; i < particleCountPerShape * 4; i++) {
       const pd = new ParticleData();
       particleDatas.push(pd);
