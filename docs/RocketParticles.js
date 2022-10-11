@@ -32,7 +32,6 @@ class RocketParticles {
   async init (scene, engine) {
     sps = new BABYLON.SolidParticleSystem("SPS", scene, { useModelMaterial: true });
     position = BABYLON.Vector3.Zero();
-    const date = new Date();
 
     // パラメーター
     const particleCountPerShape = 7;
