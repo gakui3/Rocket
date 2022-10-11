@@ -11,7 +11,7 @@ class ParticleData {
   }
 
   reset () {
-    this.lifeTime = BABYLON.Scalar.RandomRange(1, 3);
+    this.lifeTime = BABYLON.Scalar.RandomRange(1.5, 3);
     this.opacity = 0.0;
     this.lifeTimeCounter = 0.0;
   }
@@ -23,29 +23,36 @@ class RocketParticles {
     sps.setParticles();
   }
 
+  // 引数にBABYLON.sceneとBABYLON.engineが必要です
+  // BABYLON.sceneはparticleを追加するため。BABYLON.engineはdela.timeを取得するため。
+  // sceneからもdelta.timeが取得できるのですがレンダリング後からじゃないと0になってしまいengineから取得しました。
   async init (scene, engine) {
     sps = new BABYLON.SolidParticleSystem("SPS", scene, { useModelMaterial: true });
-
     position = BABYLON.Vector3.Zero();
-    const particleCount = 7;
-    const particleInitOpacity = 0.85;
-    const sphere = BABYLON.CreateSphere("sphere1", { segments: 5, diameter: 1 }, scene);
 
+    // パラメーター
+    const particleCountPerShape = 7;
+    const particleInitOpacity = 1.0;
+    const smokeScaleRange = new BABYLON.Vector2(0.04, 0.05);
+    const smokeFadeInMultipleRate = 3;
+    const smokeFadeOutMultipleRate = 1.5;
+
+    // 煙モデルをimport
     const smoke01 = await BABYLON.SceneLoader.LoadAssetContainerAsync("./assets/", "Rocket - Smoke1.gltf");
     const smoke02 = await BABYLON.SceneLoader.LoadAssetContainerAsync("./assets/", "Rocket - Smoke2.gltf");
     const smoke03 = await BABYLON.SceneLoader.LoadAssetContainerAsync("./assets/", "Rocket - Smoke3.gltf");
     const smoke04 = await BABYLON.SceneLoader.LoadAssetContainerAsync("./assets/", "Rocket - Smoke4.gltf");
     const smoke05 = await BABYLON.SceneLoader.LoadAssetContainerAsync("./assets/", "Rocket - Smoke5.gltf");
 
-    // create material
+    // 煙のマテリアルの作成
     const material = new BABYLON.StandardMaterial("smokeMaterial", scene);
     material.diffuseColor = new BABYLON.Color3(1, 1, 1);
     material.emissiveColor = new BABYLON.Color3(0.7, 0.7, 0.7);
     material.ambientColor = new BABYLON.Color3(0.7, 0.7, 0.7);
-    material.alpha = 0.85;
+    material.alpha = particleInitOpacity;
     material.specularPower = 2;
 
-    // Fresnelの設定
+    // 煙マテリアルのFresnelの設定
     material.reflectionFresnelParameters = new BABYLON.FresnelParameters();
     material.reflectionFresnelParameters.bias = 0.1;
     material.emissiveFresnelParameters = new BABYLON.FresnelParameters();
@@ -61,19 +68,18 @@ class RocketParticles {
     smoke05.meshes[1].material = material;
 
     // spsにsmokemeshを追加
-    sps.addShape(smoke01.meshes[1], particleCount);
-    sps.addShape(smoke02.meshes[1], particleCount);
-    sps.addShape(smoke03.meshes[1], particleCount);
-    sps.addShape(smoke04.meshes[1], particleCount);
+    sps.addShape(smoke01.meshes[1], particleCountPerShape);
+    sps.addShape(smoke02.meshes[1], particleCountPerShape);
+    sps.addShape(smoke03.meshes[1], particleCountPerShape);
+    sps.addShape(smoke04.meshes[1], particleCountPerShape);
     // sps.addShape(s5.meshes[1], particleCount);
 
     const particleDatas = [];
-    for (let i = 0; i < particleCount * 4; i++) {
+    for (let i = 0; i < particleCountPerShape * 4; i++) {
       const pd = new ParticleData();
       particleDatas.push(pd);
     }
 
-    sphere.dispose();
     sps.buildMesh();
     sps.mesh.hasVertexAlpha = true;
 
@@ -85,6 +91,7 @@ class RocketParticles {
       sps.setParticles();
     });
 
+    // particleの初期化処理
     sps.recycleParticle = function (particle) {
       particle.position.x = position.x + (Math.random() - 0.5) * 2;
       particle.position.y = position.y;
@@ -98,9 +105,7 @@ class RocketParticles {
       particle.rotation.y = Math.random() * Math.PI * 2;
       particle.rotation.z = Math.random() * Math.PI * 2;
 
-      particle.color.a = 0;
-
-      const s = BABYLON.Scalar.Clamp(Math.random() * 5, 0.03, 0.04);
+      const s = BABYLON.Scalar.RandomRange(smokeScaleRange.x, smokeScaleRange.y);
       particle.scaling = new BABYLON.Vector3(s, s, s);
     };
 
@@ -110,21 +115,24 @@ class RocketParticles {
       }
     };
 
+    // particleのアップデート処理
     sps.updateParticle = function (particle) {
       const dt = Math.ceil(engine.getDeltaTime()) * 0.001;
       particleDatas[particle.idx].lifeTimeCounter += dt;
 
+      // particleの現在のlifetimeを0~1にリマップして下記のアニメーションで使用するため
       const v = map(particleDatas[particle.idx].lifeTimeCounter, 0, particleDatas[particle.idx].lifeTime, 0, 1);
 
+      // 煙のアニメーションの設定
       if (v < 0.2) {
         let o = particleDatas[particle.idx].opacity;
-        o += dt * 3;
+        o += dt * smokeFadeInMultipleRate;
         o = BABYLON.Scalar.Clamp(o, 0, particleInitOpacity);
         particle.color.a = o;
         particleDatas[particle.idx].opacity = o;
       }
-      if (v > 0.9) {
-        particleDatas[particle.idx].opacity -= dt;
+      if (v > 0.7) {
+        particleDatas[particle.idx].opacity -= dt * smokeFadeOutMultipleRate;
         particle.color.a = particleDatas[particle.idx].opacity;
       }
       if (v > 1.0) {
@@ -133,7 +141,9 @@ class RocketParticles {
         return;
       }
 
+      // emitされてからparticleのvelocity.yを徐々に遅くするため(なくてもいいかも？)
       particle.velocity.y *= 0.999;
+
       particle.position.addInPlace(particle.velocity);
     };
 
