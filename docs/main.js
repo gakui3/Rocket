@@ -19,7 +19,7 @@ light.specular = new BABYLON.Color3(0.05, 0.05, 0.05);
 light.diffuse = new BABYLON.Color3(0.8, 0.8, 0.8);
 
 const rocketParticles = new RocketParticles();
-rocketParticles.init(scene);
+rocketParticles.init(scene, engine);
 
 BABYLON.SceneLoader.Append("./assets/", "Rocket - Launch.glb", scene, (obj) => {
   const _root = scene.getMeshByName("__root__");
