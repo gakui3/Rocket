@@ -57,6 +57,14 @@ stopButton.addEventListener("click", () => {
   rocketParticles.stop();
 });
 
+startButton.addEventListener("click", () => {
+  rocketParticles.start();
+});
+
+stopButton.addEventListener("click", () => {
+  rocketParticles.stop();
+});
+
 BABYLON.SceneLoader.Append("./assets/", "Rocket - Launch.glb", scene, (obj) => {
   const _root = scene.getMeshByName("__root__");
   _root.scaling = new BABYLON.Vector3(1, 1, 1);

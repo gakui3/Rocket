@@ -1,7 +1,7 @@
 import * as BABYLON from "@babylonjs/core";
 
 let position, sps;
-let isEmit = false;
+let isEmit = true;
 
 class ParticleData {
   constructor () {
@@ -27,12 +27,10 @@ class RocketParticles {
     sps.setParticles();
   }
 
-  // particleのemit開始
   start () {
     isEmit = true;
   }
 
-  // particleのemit停止
   stop () {
     isEmit = false;
   }
