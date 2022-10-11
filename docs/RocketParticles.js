@@ -15,6 +15,7 @@ class ParticleData {
     this.lifeTime = BABYLON.Scalar.RandomRange(1.8, 3.3);
     this.opacity = 0.0;
     this.lifeTimeCounter = 0.0;
+    // particleのrotateの値
     this.rotateValue = new BABYLON.Vector3(BABYLON.Scalar.RandomRange(-0.0075, -0.0075), BABYLON.Scalar.RandomRange(-0.0075, 0.0075), BABYLON.Scalar.RandomRange(-0.0075, 0.0075));
   }
 }
@@ -31,6 +32,7 @@ class RocketParticles {
   async init (scene, engine) {
     sps = new BABYLON.SolidParticleSystem("SPS", scene, { useModelMaterial: true });
     position = BABYLON.Vector3.Zero();
+    const date = new Date();
 
     // パラメーター
     const particleCountPerShape = 7;
@@ -150,11 +152,15 @@ class RocketParticles {
       // emitされてからparticleのvelocity.yを徐々に遅くするため(なくてもいいかも？)
       particle.velocity.y *= 0.999;
 
+      // noiseを追加
+      particle.velocity.x += noise.perlin2(particle.position.x / 100, particle.position.z / 100) * 0.002;
+      particle.velocity.y += noise.perlin2(particle.position.z / 100, particle.position.y / 100) * -0.002;
+      particle.velocity.z += noise.perlin2(particle.position.y / 100, particle.position.x / 100) * 0.002;
+
       particle.position.addInPlace(particle.velocity);
     };
 
     sps.initParticles();
-    sps.computeParticleVertex = true;
   }
 }
 
