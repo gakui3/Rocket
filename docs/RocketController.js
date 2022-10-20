@@ -1,12 +1,24 @@
+/* eslint-disable*/
 import * as BABYLON from '@babylonjs/core'
+import GUI from 'lil-gui'
 
-const accelerationXZ = 5
-const accelerationY = 0.1
 const dt = 0.03
 let velocity, position, positionInit
 
+const params = {
+  accelerationXZ: 5,
+  accelerationY: 0.1,
+  velocityAttenuationRateXZ: 0.993,
+};
+
 class RocketController {
-  constructor (obj) {
+  constructor(obj) {
+    
+    const gui = new GUI()
+    gui.add(params, 'accelerationXZ', 1.0, 10.0, 0.1)
+    gui.add(params, 'accelerationY', 0.05, 1.0, 0.01)
+    gui.add(params, 'velocityAttenuationRateXZ', 0.99, 0.999, 0.001)
+
     this.dt = 0.03
     position = obj.position.clone()
     positionInit = obj.position.clone()
@@ -42,9 +54,12 @@ class RocketController {
     }
 
     function updatePosition (obj) {
-      let vy = velocity.y - accelerationY * dt
+      let vy = velocity.y - params.accelerationY * dt
       vy = BABYLON.Scalar.Clamp(vy, -8, 0)
       velocity.y = vy
+
+      velocity.x *= params.velocityAttenuationRateXZ
+      velocity.z *= params.velocityAttenuationRateXZ
 
       position.x = position.x + velocity.x * dt
       position.z = position.z + velocity.z * dt
@@ -54,19 +69,19 @@ class RocketController {
     }
 
     function rightKeyDown () {
-      velocity.x = velocity.x + accelerationXZ * dt
+      velocity.x = velocity.x + params.accelerationXZ * dt
     }
     function leftKeyDown () {
-      velocity.x = velocity.x - accelerationXZ * dt
+      velocity.x = velocity.x - params.accelerationXZ * dt
     }
     function upKeyDown () {
-      velocity.z = velocity.z + accelerationXZ * dt
+      velocity.z = velocity.z + params.accelerationXZ * dt
     }
     function downKeyDown () {
-      velocity.z = velocity.z - accelerationXZ * dt
+      velocity.z = velocity.z - params.accelerationXZ * dt
     }
     function riseKeyDown () {
-      velocity.y = velocity.y + accelerationY * 35 * dt
+      velocity.y = velocity.y + params.accelerationY * 35 * dt
     }
     function reset () {
       position = positionInit.clone()
