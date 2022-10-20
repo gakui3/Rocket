@@ -2,7 +2,6 @@ import * as BABYLON from '@babylonjs/core'
 import { RocketParticles } from './RocketParticles'
 import { RocketController } from './RocketController'
 import '@babylonjs/loaders/glTF'
-import GUI from 'lil-gui'
 
 const canvas = document.getElementById('renderCanvas')
 const engine = new BABYLON.Engine(canvas)

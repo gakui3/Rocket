@@ -55,7 +55,7 @@ class RocketController {
 
     function updatePosition (obj) {
       let vy = velocity.y - params.accelerationY * dt
-      vy = BABYLON.Scalar.Clamp(vy, -8, 0)
+      vy = BABYLON.Scalar.Clamp(vy, -8, -0.5)
       velocity.y = vy
 
       velocity.x *= params.velocityAttenuationRateXZ
