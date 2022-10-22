@@ -24,11 +24,6 @@ const light2 = new BABYLON.DirectionalLight('dir01', new BABYLON.Vector3(-0.1, -
 light2.position = new BABYLON.Vector3(2, 40, 2)
 light2.intensity = 0.5
 
-// particleのインスタンスを作成
-const rocketParticles = new RocketParticles()
-rocketParticles.init(scene, engine)
-rocketParticles.start()
-
 // テスト用のguiを追加
 const startButton = document.createElement('button')
 startButton.style.top = '160px'
@@ -78,7 +73,13 @@ BABYLON.SceneLoader.Append('./assets/', 'Rocket - Launch.glb', scene, (obj) => {
   obj.animationGroups[1].start(true)
   init = true
 
-  const controller = new RocketController(_root)
+  const controller = new RocketController(_root, scene, engine)
+
+  // particleのインスタンスを作成
+  const rocketParticles = new RocketParticles(7)
+  rocketParticles.init(scene, engine)
+  rocketParticles.setRoot(_root, new BABYLON.Vector3(58.5, -13, 7).add(offset))
+  rocketParticles.start()
 })
 
 // grand planeの追加
@@ -93,6 +94,6 @@ engine.runRenderLoop(() => {
   if (!init) { return }
   // ロケットのモデルのoriginがずれてたので適当に調整した値です(58.5, -6, 7)
   // エミットする際のpositionはsetposition関数からセットして下さい
-  rocketParticles.setPosition(_root.position.clone().add(new BABYLON.Vector3(58.5, -13, 7)).add(offset))
+  // rocketParticles.setPosition(_root.position.clone().add(new BABYLON.Vector3(58.5, -13, 7)).add(offset))
   scene.render()
 })

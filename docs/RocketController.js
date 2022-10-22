@@ -1,6 +1,7 @@
 /* eslint-disable*/
 import * as BABYLON from '@babylonjs/core'
 import GUI from 'lil-gui'
+import { RocketParticles } from './RocketParticles'
 
 const dt = 0.03
 let velocity, position, positionInit
@@ -12,12 +13,17 @@ const params = {
 };
 
 class RocketController {
-  constructor(obj) {
+  constructor(obj, scene, engine) {
     
     const gui = new GUI()
     gui.add(params, 'accelerationXZ', 1.0, 10.0, 0.1)
     gui.add(params, 'accelerationY', 0.05, 1.0, 0.01)
     gui.add(params, 'velocityAttenuationRateXZ', 0.99, 0.999, 0.001)
+
+    const rocketParticles = new RocketParticles(15)
+    rocketParticles.init(scene, engine)
+    rocketParticles.setRoot(obj, new BABYLON.Vector3(58.5, -13, 7).add(new BABYLON.Vector3(-30, 15, 0)))
+    rocketParticles.stop()
 
     this.dt = 0.03
     position = obj.position.clone()
@@ -51,6 +57,16 @@ class RocketController {
           reset()
         }
       })
+      document.addEventListener('keypress', event => {
+        if (event.key === 'e') {
+          rocketParticles.start()
+        }
+      });
+      document.addEventListener('keyup', event => {
+        if (event.key === 'e') {
+          rocketParticles.stop()
+        }
+      });
     }
 
     function updatePosition (obj) {

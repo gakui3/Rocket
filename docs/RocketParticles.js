@@ -1,7 +1,6 @@
 import * as BABYLON from '@babylonjs/core'
 
-let position, sps, particleDatas
-let isEmit = true
+// let root, offset
 
 class ParticleData {
   constructor () {
@@ -22,9 +21,21 @@ class ParticleData {
 }
 
 class RocketParticles {
-  setPosition (p) {
-    position = p
-    sps.setParticles()
+  constructor (particleCount) {
+    this.particleCount = particleCount
+    this.root = null
+    this.offset = BABYLON.Vector3.Zero()
+    this.isEmit = true
+  }
+
+  // setPosition (p) {
+  //   position = p
+  //   // sps.setParticles()
+  // }
+
+  setRoot (_parent, _offset) {
+    this.root = _parent
+    this.offset = _offset
   }
 
   start () {
@@ -32,22 +43,22 @@ class RocketParticles {
     //   particleDatas[sps.particles[p].idx].reset();
     //   sps.particles[p].scaling = new BABYLON.Vector3(0, 0, 0);
     // }
-    isEmit = true
+    this.isEmit = true
   }
 
   stop () {
-    isEmit = false
+    this.isEmit = false
   }
 
   // 引数にBABYLON.sceneとBABYLON.engineが必要です
   // BABYLON.sceneはparticleを追加するため。BABYLON.engineはdela.timeを取得するため。
   // sceneからもdelta.timeが取得できるのですがレンダリング後からじゃないと0になってしまいengineから取得しました。
   async init (scene, engine) {
-    sps = new BABYLON.SolidParticleSystem('SPS', scene, { useModelMaterial: true })
-    position = BABYLON.Vector3.Zero()
+    const sps = new BABYLON.SolidParticleSystem('SPS', scene, { useModelMaterial: true })
+    // let position = BABYLON.Vector3.Zero()
 
     // パラメーター
-    const particleCountPerShape = 7
+    const particleCountPerShape = this.particleCount
     const particleInitOpacity = 1.0
     const smokeScaleRange = new BABYLON.Vector2(0.04, 0.05)
     const smokeFadeInMultipleRate = 3
@@ -90,7 +101,7 @@ class RocketParticles {
     sps.addShape(smoke04.meshes[1], particleCountPerShape)
     // sps.addShape(s5.meshes[1], particleCount);
 
-    particleDatas = []
+    const particleDatas = []
     for (let i = 0; i < particleCountPerShape * 4; i++) {
       const pd = new ParticleData()
       particleDatas.push(pd)
@@ -109,11 +120,14 @@ class RocketParticles {
 
     // particleの初期化処理
     sps.recycleParticle = function (particle) {
-      if (!isEmit) { return }
+      if (!this.isEmit) { return }
       particleDatas[particle.idx].reset()
-      particle.position.x = position.x + (Math.random() - 0.5) * 2
-      particle.position.y = position.y
-      particle.position.z = position.z + (Math.random() - 0.5) * 2
+      // particle.position.x = position.x + (Math.random() - 0.5) * 2
+      // particle.position.y = position.y
+      // particle.position.z = position.z + (Math.random() - 0.5) * 2
+      particle.position.x = this.root.position.x + (Math.random() - 0.5) * 2 + this.offset.x
+      particle.position.y = this.root.position.y + this.offset.y
+      particle.position.z = this.root.position.z + (Math.random() - 0.5) * 2 + this.offset.z
 
       particle.velocity.x = (Math.random() - 0.5) * 0.06
       particle.velocity.y = -(Math.random() + 0.5) * 0.05
@@ -125,7 +139,7 @@ class RocketParticles {
 
       const s = BABYLON.Scalar.RandomRange(smokeScaleRange.x, smokeScaleRange.y)
       particle.scaling = new BABYLON.Vector3(s, s, s)
-    }
+    }.bind(this)
 
     sps.initParticles = function () {
       for (let p = 0; p < sps.nbParticles; p++) {
@@ -174,6 +188,13 @@ class RocketParticles {
     }
 
     sps.initParticles()
+
+    update()
+
+    function update () {
+      requestAnimationFrame(update)
+      sps.setParticles()
+    }
   }
 }
 
