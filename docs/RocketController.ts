@@ -2,11 +2,6 @@ import * as BABYLON from '@babylonjs/core';
 // import GUI from 'lil-gui';
 import { RocketParticles } from './RocketParticles';
 
-let dt: any = 0.03;
-let velocity: BABYLON.Vector3;
-let position: BABYLON.Vector3;
-let positionInit: BABYLON.Vector3;
-
 const params = {
   accelerationXZ: 5,
   accelerationY: 0.1,
@@ -14,104 +9,128 @@ const params = {
 };
 
 class RocketController {
+  private animationID: any;
+  private position: BABYLON.Vector3;
+  private velocity: BABYLON.Vector3;
+  private positionInit: BABYLON.Vector3
+  private rocketParticles: RocketParticles
+  private obj: BABYLON.Mesh | null
+  private dt: any = 0.03;
+  
   constructor(obj: BABYLON.Mesh, scene: BABYLON.Scene, engine: BABYLON.Engine) {
-    //debugようにguiを設定していました。不要でしたら削除して下さい。
-    // const gui = new GUI();
-    // gui.add(params, 'accelerationXZ', 1.0, 10.0, 0.1);
-    // gui.add(params, 'accelerationY', 0.05, 1.0, 0.01);
-    // gui.add(params, 'velocityAttenuationRateXZ', 0.99, 0.999, 0.001);
-
-    const rocketParticles = new RocketParticles(15);
-    rocketParticles.init(scene, engine);
-    rocketParticles.setRoot(
+    this.obj = obj;
+    this.rocketParticles = new RocketParticles(15);
+    this.rocketParticles.init(scene, engine);
+    this.rocketParticles.setRoot(
       obj,
       new BABYLON.Vector3(58.5, -13, 7).add(new BABYLON.Vector3(-30, 15, 0))
     );
-    rocketParticles.stop();
+    this.rocketParticles.stop();
 
-    dt = 0.03;
-    position = obj.position.clone();
-    positionInit = obj.position.clone();
-    velocity = new BABYLON.Vector3(0, -0.5, 0);
-    addkeyEvent();
-    update();
-    function update() {
-      requestAnimationFrame(update);
-      updatePosition(obj);
-    }
+    this.position = obj.position.clone();
+    this.positionInit = obj.position.clone();
+    this.velocity = new BABYLON.Vector3(0, -0.5, 0);
+    this.addkeyEvent();
+    this.update();
 
     // カメラを動かすためにキーバインドを
     // wasd: 移動
     // e : インジェクション
     // r : リセット
     // に設定してあります。適宜変更して下さい。
-    function addkeyEvent() {
-      document.addEventListener('keydown', (event) => {
-        if (event.key === 'w') {
-          upKeyDown();
-        }
-        if (event.key === 's') {
-          downKeyDown();
-        }
-        if (event.key === 'd') {
-          rightKeyDown();
-        }
-        if (event.key === 'a') {
-          leftKeyDown();
-        }
-        if (event.key === 'e') {
-          riseKeyDown();
-        }
-        if (event.key === 'r') {
-          reset();
-        }
-      });
-      document.addEventListener('keypress', (event) => {
-        if (event.key === 'e') {
-          rocketParticles.start();
-        }
-      });
-      document.addEventListener('keyup', (event) => {
-        if (event.key === 'e') {
-          rocketParticles.stop();
-        }
-      });
-    }
+  }
+  
+  private updatePosition(obj: BABYLON.Mesh) {
+    let vy = this.velocity.y - params.accelerationY * this.dt;
+    vy = BABYLON.Scalar.Clamp(vy, -8, -0.5);
+    this.velocity.y = vy;
 
-    function updatePosition(obj: BABYLON.Mesh) {
-      let vy = velocity.y - params.accelerationY * dt;
-      vy = BABYLON.Scalar.Clamp(vy, -8, -0.5);
-      velocity.y = vy;
+    this.velocity.x *= params.velocityAttenuationRateXZ;
+    this.velocity.z *= params.velocityAttenuationRateXZ;
 
-      velocity.x *= params.velocityAttenuationRateXZ;
-      velocity.z *= params.velocityAttenuationRateXZ;
+    this.position.x = this.position.x + this.velocity.x * this.dt;
+    this.position.z = this.position.z + this.velocity.z * this.dt;
+    this.position.y = this.position.y + this.velocity.y * this.dt;
 
-      position.x = position.x + velocity.x * dt;
-      position.z = position.z + velocity.z * dt;
-      position.y = position.y + velocity.y * dt;
+    obj.position = this.position;
+  }
 
-      obj.position = position;
+  private update() {
+    this.animationID = requestAnimationFrame(() => this.update())
+    if (this.obj !== null) {
+      this.updatePosition(this.obj);
     }
+  }
 
-    function rightKeyDown() {
-      velocity.x = velocity.x + params.accelerationXZ * dt;
+  private addkeyEvent() {
+    document.addEventListener('keydown', this.keyDownEvent, true);
+    document.addEventListener('keypress', this.keyPressEvent, true);
+    document.addEventListener('keyup', this.keyUpEvent, true);
+  }
+
+  private removekeyEvent() {
+    document.removeEventListener('keydown', this.keyDownEvent, true);
+    document.removeEventListener('keypress', this.keyPressEvent, true);
+    document.removeEventListener('keyup', this.keyUpEvent, true);
+  }
+
+  private keyDownEvent = (event : KeyboardEvent) => {
+    if (event.key === 'w') {
+      this.upKeyDown();
     }
-    function leftKeyDown() {
-      velocity.x = velocity.x - params.accelerationXZ * dt;
+    if (event.key === 's') {
+      this.downKeyDown();
     }
-    function upKeyDown() {
-      velocity.z = velocity.z + params.accelerationXZ * dt;
+    if (event.key === 'd') {
+      this.rightKeyDown();
     }
-    function downKeyDown() {
-      velocity.z = velocity.z - params.accelerationXZ * dt;
+    if (event.key === 'a') {
+      this.leftKeyDown();
     }
-    function riseKeyDown() {
-      velocity.y = velocity.y + params.accelerationY * 35 * dt;
+    if (event.key === 'e') {
+      this.riseKeyDown();
     }
-    function reset() {
-      position = positionInit.clone();
-      velocity = new BABYLON.Vector3(0, -0.5, 0);
+    if (event.key === 'r') {
+      this.reset();
     }
+  }
+
+  private keyPressEvent = (event: KeyboardEvent) => {
+    if (event.key === 'e') {
+      this.rocketParticles.start();
+    }
+  }
+
+  private keyUpEvent = (event: KeyboardEvent) => {
+    if (event.key === 'e') {
+      this.rocketParticles.stop();
+    }
+  }
+
+  private rightKeyDown() {
+    this.velocity.x = this.velocity.x + params.accelerationXZ * this.dt;
+  }
+  private leftKeyDown() {
+    this.velocity.x = this.velocity.x - params.accelerationXZ * this.dt;
+  }
+  private upKeyDown() {
+    this.velocity.z = this.velocity.z + params.accelerationXZ * this.dt;
+  }
+  private downKeyDown() {
+    this.velocity.z = this.velocity.z - params.accelerationXZ * this.dt;
+  }
+  private riseKeyDown() {
+    this.velocity.y = this.velocity.y + params.accelerationY * 35 * this.dt;
+  }
+  private reset() {
+    this.position = this.positionInit.clone();
+    this.velocity = new BABYLON.Vector3(0, -0.5, 0);
+  }
+
+  public destroy() {
+    cancelAnimationFrame(this.animationID);
+    this.removekeyEvent();
+    this.obj = null;
   }
 }
 

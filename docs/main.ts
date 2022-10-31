@@ -11,6 +11,7 @@ camera.setTarget(BABYLON.Vector3.Zero());
 let root: BABYLON.Mesh;
 let init: boolean = false;
 let rocketParticles: RocketParticles;
+let storage: any = {};
 // ロケットのモデルのoriginがずれてたので適当な調整用のoffset値です
 const offset = new BABYLON.Vector3(-30, 15, 0);
 
@@ -74,7 +75,9 @@ BABYLON.SceneLoader.Append('./assets/', 'Rocket - Launch.glb', scene, (obj) => {
   init = true;
 
   //rocketコントローラーのインスタンスを作成
-  const controller: RocketController = new RocketController(root, scene, engine);
+  storage.instance = new RocketController(root, scene, engine);
+  // delete storage.instance;
+  // storage.instance.destroy();
 
   // particleのインスタンスを作成
   rocketParticles = new RocketParticles(7);
@@ -96,7 +99,12 @@ engine.runRenderLoop(() => {
     return;
   }
 
-  //こちら不必要になりました。
-  //rocketParticles.setPosition(_root.position.clone().add(new BABYLON.Vector3(58.5, -13, 7)).add(offset))
   scene.render();
+});
+
+document.addEventListener('keydown', (event) => {
+  if (event.key === 'f') {
+    storage.instance.destroy();
+    delete storage.instance;
+  }
 });
