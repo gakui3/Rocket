@@ -15,17 +15,20 @@ class RocketController {
   private positionInit: BABYLON.Vector3
   private rocketParticles: RocketParticles
   private obj: BABYLON.Mesh | null
-  private dt: any = 0.03;
+  private dt: any = 0.016;
+  private engine: BABYLON.Engine | null
   
-  constructor(obj: BABYLON.Mesh, scene: BABYLON.Scene, engine: BABYLON.Engine) {
+  constructor(obj: BABYLON.Mesh, scene: BABYLON.Scene, smokeModels: BABYLON.AssetContainer[]) {
     this.obj = obj;
+    this.engine = null
     this.rocketParticles = new RocketParticles(15);
-    this.rocketParticles.init(scene, engine);
+    this.rocketParticles.init(scene, smokeModels.concat());
     this.rocketParticles.setRoot(
       obj,
       new BABYLON.Vector3(58.5, -13, 7).add(new BABYLON.Vector3(-30, 15, 0))
     );
     this.rocketParticles.stop();
+    this.engine = scene.getEngine();
 
     this.position = obj.position.clone();
     this.positionInit = obj.position.clone();
@@ -39,7 +42,7 @@ class RocketController {
     // r : リセット
     // に設定してあります。適宜変更して下さい。
   }
-  
+
   private updatePosition(obj: BABYLON.Mesh) {
     let vy = this.velocity.y - params.accelerationY * this.dt;
     vy = BABYLON.Scalar.Clamp(vy, -8, -0.5);
@@ -59,6 +62,12 @@ class RocketController {
     this.animationID = requestAnimationFrame(() => this.update())
     if (this.obj !== null) {
       this.updatePosition(this.obj);
+    }
+    
+    if (this.engine != null) {
+      this.dt = Math.ceil(this.engine.getDeltaTime()) * 0.001;
+    } else {
+      this.dt = 0.016;
     }
   }
 

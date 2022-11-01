@@ -1,4 +1,5 @@
 import * as BABYLON from '@babylonjs/core';
+import { Engine } from 'babylonjs';
 declare var noise: any;
 
 class ParticleData {
@@ -33,12 +34,14 @@ class RocketParticles {
   root: any;
   offset: BABYLON.Vector3;
   isEmit: boolean;
+  smokeModels: BABYLON.AssetContainer[];
 
   constructor(particleCount: number) {
     this.particleCount = particleCount;
     // this.root
     this.offset = BABYLON.Vector3.Zero();
     this.isEmit = true;
+    this.smokeModels = [];
   }
 
   // setPosition (p) {
@@ -66,11 +69,10 @@ class RocketParticles {
   // 引数にBABYLON.sceneとBABYLON.engineが必要です
   // BABYLON.sceneはparticleを追加するため。BABYLON.engineはdela.timeを取得するため。
   // sceneからもdelta.timeが取得できるのですがレンダリング後からじゃないと0になってしまいengineから取得しました。
-  async init(scene: BABYLON.Scene, engine: BABYLON.Engine) {
+  init(scene: BABYLON.Scene, smokeModels: BABYLON.AssetContainer[]) {
     const sps: BABYLON.SolidParticleSystem = new BABYLON.SolidParticleSystem('SPS', scene, {
       useModelMaterial: true,
     });
-    // let position = BABYLON.Vector3.Zero()
 
     // パラメーター
     const particleCountPerShape = this.particleCount;
@@ -79,27 +81,7 @@ class RocketParticles {
     const smokeFadeInMultipleRate = 3;
     const smokeFadeOutMultipleRate = 1.5;
 
-    // 煙モデルをimport
-    const smoke01 = await BABYLON.SceneLoader.LoadAssetContainerAsync(
-      './assets/',
-      'Rocket - Smoke1.gltf'
-    );
-    const smoke02 = await BABYLON.SceneLoader.LoadAssetContainerAsync(
-      './assets/',
-      'Rocket - Smoke2.gltf'
-    );
-    const smoke03 = await BABYLON.SceneLoader.LoadAssetContainerAsync(
-      './assets/',
-      'Rocket - Smoke3.gltf'
-    );
-    const smoke04 = await BABYLON.SceneLoader.LoadAssetContainerAsync(
-      './assets/',
-      'Rocket - Smoke4.gltf'
-    );
-    const smoke05 = await BABYLON.SceneLoader.LoadAssetContainerAsync(
-      './assets/',
-      'Rocket - Smoke5.gltf'
-    );
+    this.smokeModels = smokeModels;
 
     // 煙のマテリアルの作成
     const material = new BABYLON.StandardMaterial('smokeMaterial', scene);
@@ -118,18 +100,15 @@ class RocketParticles {
     material.emissiveFresnelParameters.leftColor = BABYLON.Color3.White();
     material.emissiveFresnelParameters.rightColor = new BABYLON.Color3(0.8, 0.8, 0.8);
 
-    smoke01.meshes[1].material = material;
-    smoke02.meshes[1].material = material;
-    smoke03.meshes[1].material = material;
-    smoke04.meshes[1].material = material;
-    smoke05.meshes[1].material = material;
+
+    for (let i = 0; i < this.smokeModels.length; i++){
+      this.smokeModels[i].meshes[1].material = material;
+    }
 
     // spsにsmokemeshを追加
-    sps.addShape(<BABYLON.Mesh>smoke01.meshes[1], particleCountPerShape);
-    sps.addShape(<BABYLON.Mesh>smoke02.meshes[1], particleCountPerShape);
-    sps.addShape(<BABYLON.Mesh>smoke03.meshes[1], particleCountPerShape);
-    sps.addShape(<BABYLON.Mesh>smoke04.meshes[1], particleCountPerShape);
-    // sps.addShape(s5.meshes[1], particleCount);
+    for (let i = 0; i < 4; i++){
+      sps.addShape(<BABYLON.Mesh>this.smokeModels[i].meshes[1], particleCountPerShape);
+    }
 
     const particleDatas: ParticleData[] = [];
     for (let i = 0; i < particleCountPerShape * 4; i++) {
@@ -181,6 +160,7 @@ class RocketParticles {
 
     // particleのアップデート処理
     sps.updateParticle = function (particle: any): any {
+      const engine = scene.getEngine();
       const dt = Math.ceil(engine.getDeltaTime()) * 0.001;
       particleDatas[particle.idx].lifeTimeCounter += dt;
 
@@ -230,7 +210,7 @@ class RocketParticles {
         noise.perlin2(particle.position.y / 100, particle.position.x / 100) * 0.002;
 
       particle.position.addInPlace(particle.velocity);
-    };
+    }
 
     sps.initParticles();
 
